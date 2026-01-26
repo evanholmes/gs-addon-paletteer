@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 12px;
+      background: #f8f9fa;
+      color: #202124;
+      transition: padding 0.2s;
+    }
+    
+    body.compact {
+      padding: 8px;
+      background: transparent;
+    }
+    
+    .main-container {
+      transition: width 0.2s;
+    }
+    
+    .compact .main-container {
+      width: 52px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .compact .header {
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    
+    .header-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .compact .header-title {
+      display: none;
+    }
+    
+    .toggle-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .toggle-btn:hover {
+      background: #e8eaed;
+    }
+    
+    .toggle-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .section {
+      margin-bottom: 16px;
+    }
+    
+    .compact .section.hideable {
+      display: none;
+    }
+    
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #5f6368;
+      margin-bottom: 8px;
+    }
+    
+    .compact .section-title {
+      display: none;
+    }
+    
+    .import-row {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .import-input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    
+    .import-input:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+    
+    .btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .btn-primary {
+      background: #1a73e8;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1557b0;
+    }
+    
+    .btn-secondary {
+      background: #fff;
+      color: #202124;
+      border: 1px solid #dadce0;
+    }
+    
+    .btn-secondary:hover {
+      background: #f1f3f4;
+    }
+    
+    /* Full mode palette */
+    .palette-full {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .compact .palette-full {
+      display: none;
+    }
+    
+    /* Compact mode palette - vertical stack */
+    .palette-compact {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .compact .palette-compact {
+      display: flex;
+    }
+    
+    .compact-swatch {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.1s, border-color 0.15s;
+      position: relative;
+    }
+    
+    .compact-swatch:hover {
+      transform: scale(1.08);
+      border-color: #1a73e8;
+    }
+    
+    .compact-swatch.locked::after {
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      right: 3px;
+      width: 8px;
+      height: 8px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      padding: 8px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .color-swatch {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.1s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+    
+    .color-swatch:hover {
+      transform: scale(1.05);
+      border-color: #1a73e8;
+    }
+    
+    .color-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .color-hex {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .color-actions {
+      display: flex;
+      gap: 2px;
+    }
+    
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: #f1f3f4;
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    
+    .icon-btn:hover {
+      background: #e8eaed;
+    }
+    
+    .icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .lock-btn {
+      background: transparent;
+    }
+    
+    .lock-btn:hover {
+      background: #f1f3f4;
+    }
+    
+    .actions-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .compact .actions-row {
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    
+    .btn-action {
+      flex: 1;
+      padding: 10px 8px;
+      font-size: 12px;
+    }
+    
+    .compact .btn-action {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-action .btn-text {
+      display: inline;
+    }
+    
+    .compact .btn-action .btn-text {
+      display: none;
+    }
+    
+    .btn-action .btn-icon {
+      display: none;
+    }
+    
+    .compact .btn-action .btn-icon {
+      display: inline;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      background: #202124;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.2s;
+      z-index: 100;
+    }
+    
+    .compact .toast {
+      left: 8px;
+      right: auto;
+      padding: 8px 12px;
+      font-size: 11px;
+    }
+    
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .help-text {
+      font-size: 10px;
+      color: #80868b;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+    
+    .compact .help-text {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="header">
+      <span class="header-title">Paletteer</span>
+      <button class="toggle-btn" onclick="toggleCompact()" title="Toggle compact mode" id="toggleBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 14 10 14 10 20"></polyline>
+          <polyline points="20 10 14 10 14 4"></polyline>
+          <line x1="14" y1="10" x2="21" y2="3"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="section hideable">
+      <div class="section-title">Import from Coolors</div>
+      <div class="import-row">
+        <input type="text" class="import-input" id="coolorsUrl" placeholder="Paste Coolors URL...">
+        <button class="btn btn-secondary" onclick="importFromUrl()">Import</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="palette-full" id="paletteFull"></div>
+      <div class="palette-compact" id="paletteCompact"></div>
+      
+      <div class="actions-row">
+        <button class="btn btn-secondary btn-action" onclick="copyAllHex()">
+          <span class="btn-text">Copy All</span>
+          <span class="btn-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+          </span>
+        </button>
+        <button class="btn btn-primary btn-action" onclick="generate()">
+          <span class="btn-text">⟳ Generate</span>
+          <span class="btn-icon">⟳</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="help-text">
+      <strong>Click</strong> swatch → apply background<br>
+      <strong>Shift+click</strong> → text color<br>
+      <strong>Right-click</strong> → lock/unlock (compact)<br>
+      <strong>Copy</strong> → paste into Custom Color
+    </p>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // SVG icons
+    const icons = {
+      locked: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" fill="currentColor"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>`,
+      unlocked: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+      </svg>`,
+      copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>`,
+      expand: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <polyline points="9 21 3 21 3 15"></polyline>
+        <line x1="21" y1="3" x2="14" y2="10"></line>
+        <line x1="3" y1="21" x2="10" y2="14"></line>
+      </svg>`,
+      collapse: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="4 14 10 14 10 20"></polyline>
+        <polyline points="20 10 14 10 14 4"></polyline>
+        <line x1="14" y1="10" x2="21" y2="3"></line>
+        <line x1="3" y1="21" x2="10" y2="14"></line>
+      </svg>`
+    };
+
+    // State
+    let colors = [
+      { hex: '#EFF7CF', locked: false },
+      { hex: '#BAD9B5', locked: false },
+      { hex: '#ABA361', locked: false },
+      { hex: '#732C2C', locked: false },
+      { hex: '#420C14', locked: false }
+    ];
+    
+    let isCompact = false;
+
+    // Toggle compact mode
+    function toggleCompact() {
+      isCompact = !isCompact;
+      document.body.classList.toggle('compact', isCompact);
+      document.getElementById('toggleBtn').innerHTML = isCompact ? icons.expand : icons.collapse;
+    }
+
+    // Render the palette (both views)
+    function render() {
+      // Full view
+      const fullContainer = document.getElementById('paletteFull');
+      fullContainer.innerHTML = colors.map((color, i) => `
+        <div class="color-row">
+          <div 
+            class="color-swatch" 
+            style="background: ${color.hex}"
+            onclick="applySwatch(event, ${i})"
+            title="Click: background, Shift+click: text"
+          ></div>
+          <div class="color-info">
+            <span class="color-hex">${color.hex}</span>
+          </div>
+          <div class="color-actions">
+            <button 
+              class="icon-btn" 
+              onclick="copyHex(${i})"
+              title="Copy hex"
+            >${icons.copy}</button>
+            <button 
+              class="icon-btn lock-btn" 
+              onclick="toggleLock(${i})"
+              title="${color.locked ? 'Unlock' : 'Lock'}"
+            >${color.locked ? icons.locked : icons.unlocked}</button>
+          </div>
+        </div>
+      `).join('');
+      
+      // Compact view
+      const compactContainer = document.getElementById('paletteCompact');
+      compactContainer.innerHTML = colors.map((color, i) => `
+        <div 
+          class="compact-swatch ${color.locked ? 'locked' : ''}" 
+          style="background: ${color.hex}"
+          onclick="applySwatch(event, ${i})"
+          oncontextmenu="toggleLock(${i}); return false;"
+          title="Click: apply, Right-click: lock"
+        ></div>
+      `).join('');
+    }
+
+    // Apply color to cells
+    function applySwatch(event, index) {
+      const hex = colors[index].hex;
+      if (event.shiftKey) {
+        google.script.run
+          .withSuccessHandler(() => showToast(`Text: ${hex}`))
+          .applyTextColor(hex);
+      } else {
+        google.script.run
+          .withSuccessHandler(() => showToast(`Fill: ${hex}`))
+          .applyBackgroundColor(hex);
+      }
+    }
+
+    // Toggle lock state
+    function toggleLock(index) {
+      colors[index].locked = !colors[index].locked;
+      render();
+    }
+
+    // Copy single hex to clipboard
+    function copyHex(index) {
+      const hex = colors[index].hex;
+      navigator.clipboard.writeText(hex);
+      showToast(`Copied ${hex}`);
+    }
+
+    // Copy all hex codes
+    function copyAllHex() {
+      const allHex = colors.map(c => c.hex).join('\n');
+      navigator.clipboard.writeText(allHex);
+      showToast(`Copied ${colors.length} colors`);
+    }
+
+    // Generate new palette
+    function generate() {
+      google.script.run
+        .withSuccessHandler(newColors => {
+          newColors.forEach((hex, i) => {
+            if (!colors[i].locked) {
+              colors[i].hex = hex.toUpperCase();
+            }
+          });
+          render();
+        })
+        .generatePalette(colors);
+    }
+
+    // Import from Coolors URL
+    function importFromUrl() {
+      const url = document.getElementById('coolorsUrl').value.trim();
+      if (!url) {
+        showToast('Paste a Coolors URL first');
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(newColors => {
+          if (newColors && newColors.length > 0) {
+            colors = newColors.map(hex => ({ hex: hex.toUpperCase(), locked: false }));
+            render();
+            showToast(`Imported ${newColors.length} colors`);
+            document.getElementById('coolorsUrl').value = '';
+          } else {
+            showToast('Could not parse URL');
+          }
+        })
+        .parseCoolorsUrl(url);
+    }
+
+    // Toast notification
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
