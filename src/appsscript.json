@@ -10,7 +10,7 @@
   "addOns": {
     "common": {
       "name": "Paletteer",
-      "logoUrl": "https://www.gstatic.com/images/branding/product/1x/apps_script_48dp.png",
+      "logoUrl": "https://raw.githubusercontent.com/evanholmes/gs-addon-paletteer/main/marketing-material/gs-addon-logo/paletteer-logo-128.png",
       "homepageTrigger": {
         "runFunction": "onOpen"
       }
