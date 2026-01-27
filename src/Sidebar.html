@@ -255,9 +255,49 @@
     .lock-btn {
       background: transparent;
     }
-    
+
     .lock-btn:hover {
       background: #f1f3f4;
+    }
+
+    .star-btn {
+      background: transparent;
+      color: #80868b;
+    }
+
+    .star-btn:hover {
+      background: #fef7e0;
+      color: #f9ab00;
+    }
+
+    .star-btn.starred {
+      color: #f9ab00;
+    }
+
+    .favorites-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .fav-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.1s, border-color 0.15s;
+      position: relative;
+    }
+
+    .fav-swatch:hover {
+      transform: scale(1.1);
+      border-color: #1a73e8;
+    }
+
+    .compact .favorites-section {
+      display: none;
     }
     
     .actions-row {
@@ -332,12 +372,25 @@
     }
     
     .help-text {
-      font-size: 10px;
-      color: #80868b;
-      margin-top: 12px;
-      line-height: 1.4;
+      font-size: 11px;
+      color: #5f6368;
+      margin-top: 16px;
+      line-height: 1.6;
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #e8eaed;
     }
-    
+
+    .help-text p {
+      margin: 4px 0;
+    }
+
+    .help-text strong {
+      color: #202124;
+      font-weight: 600;
+    }
+
     .compact .help-text {
       display: none;
     }
@@ -386,12 +439,17 @@
       </div>
     </div>
 
-    <p class="help-text">
-      <strong>Click</strong> swatch → apply background<br>
-      <strong>Shift+click</strong> → text color<br>
-      <strong>Right-click</strong> → lock/unlock (compact)<br>
-      <strong>Copy</strong> → paste into Custom Color
-    </p>
+    <div class="section favorites-section hideable" id="favoritesSection" style="display:none;">
+      <div class="section-title">★ Favorites</div>
+      <div class="favorites-grid" id="favoritesGrid"></div>
+    </div>
+
+    <div class="help-text">
+      <p><strong>Click swatch</strong> → Apply background color</p>
+      <p><strong>Shift + Click</strong> → Apply text color</p>
+      <p><strong>★ Star</strong> → Save to favorites</p>
+      <p><strong>Lock icon</strong> → Keep color when generating</p>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -422,6 +480,12 @@
         <polyline points="20 10 14 10 14 4"></polyline>
         <line x1="14" y1="10" x2="21" y2="3"></line>
         <line x1="3" y1="21" x2="10" y2="14"></line>
+      </svg>`,
+      star: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>`,
+      starFilled: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
       </svg>`
     };
 
@@ -435,6 +499,40 @@
     ];
     
     let isCompact = false;
+    let favorites = [];
+
+    // Load favorites on init
+    google.script.run.withSuccessHandler(favs => {
+      favorites = favs || [];
+      render();
+    }).getFavorites();
+
+    // Toggle favorite
+    function toggleFavorite(hex) {
+      hex = hex.toUpperCase();
+      if (favorites.includes(hex)) {
+        google.script.run.withSuccessHandler(favs => {
+          favorites = favs;
+          render();
+          showToast(`Removed ${hex}`);
+        }).removeFavorite(hex);
+      } else {
+        google.script.run.withSuccessHandler(favs => {
+          favorites = favs;
+          render();
+          showToast(`★ Saved ${hex}`);
+        }).addFavorite(hex);
+      }
+    }
+
+    // Apply favorite color
+    function applyFavorite(event, hex) {
+      if (event.shiftKey) {
+        google.script.run.withSuccessHandler(() => showToast(`Text: ${hex}`)).applyTextColor(hex);
+      } else {
+        google.script.run.withSuccessHandler(() => showToast(`Fill: ${hex}`)).applyBackgroundColor(hex);
+      }
+    }
 
     // Toggle compact mode
     function toggleCompact() {
@@ -459,13 +557,18 @@
             <span class="color-hex">${color.hex}</span>
           </div>
           <div class="color-actions">
-            <button 
-              class="icon-btn" 
+            <button
+              class="icon-btn star-btn ${favorites.includes(color.hex) ? 'starred' : ''}"
+              onclick="toggleFavorite('${color.hex}')"
+              title="${favorites.includes(color.hex) ? 'Remove from favorites' : 'Add to favorites'}"
+            >${favorites.includes(color.hex) ? icons.starFilled : icons.star}</button>
+            <button
+              class="icon-btn"
               onclick="copyHex(${i})"
               title="Copy hex"
             >${icons.copy}</button>
-            <button 
-              class="icon-btn lock-btn" 
+            <button
+              class="icon-btn lock-btn"
               onclick="toggleLock(${i})"
               title="${color.locked ? 'Unlock' : 'Lock'}"
             >${color.locked ? icons.locked : icons.unlocked}</button>
@@ -476,14 +579,32 @@
       // Compact view
       const compactContainer = document.getElementById('paletteCompact');
       compactContainer.innerHTML = colors.map((color, i) => `
-        <div 
-          class="compact-swatch ${color.locked ? 'locked' : ''}" 
+        <div
+          class="compact-swatch ${color.locked ? 'locked' : ''}"
           style="background: ${color.hex}"
           onclick="applySwatch(event, ${i})"
           oncontextmenu="toggleLock(${i}); return false;"
           title="Click: apply, Right-click: lock"
         ></div>
       `).join('');
+
+      // Favorites
+      const favSection = document.getElementById('favoritesSection');
+      const favGrid = document.getElementById('favoritesGrid');
+      if (favorites.length > 0) {
+        favSection.style.display = 'block';
+        favGrid.innerHTML = favorites.map(hex => `
+          <div
+            class="fav-swatch"
+            style="background: ${hex}"
+            onclick="applyFavorite(event, '${hex}')"
+            oncontextmenu="toggleFavorite('${hex}'); return false;"
+            title="${hex} (right-click to remove)"
+          ></div>
+        `).join('');
+      } else {
+        favSection.style.display = 'none';
+      }
     }
 
     // Apply color to cells
