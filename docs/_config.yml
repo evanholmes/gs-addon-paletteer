@@ -1,3 +1,5 @@
 title: Paletteer
 description: Beautiful color palettes for Google Sheets
 theme: jekyll-theme-minimal
+include:
+  - google982f6882afedb9d6.html
