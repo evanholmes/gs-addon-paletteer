@@ -32,6 +32,40 @@ npx clasp pull    # Pull changes from Apps Script
 - 37° hue shifts for pleasing color relationships
 - Lock/unlock mechanism preserves user-selected colors during regeneration
 
-## Current Status
-- Core functionality complete
-- Next: GCP project setup for public distribution
+## Current Status (Updated Jan 2026)
+
+### Completed
+- GCP project created and linked to Apps Script
+- OAuth consent screen configured (scopes: spreadsheets.currentonly)
+- OAuth verification submitted (under review - has logo)
+- GitHub Pages live at https://evanholmes.github.io/gs-addon-paletteer/
+  - Privacy policy, terms of service, home page
+  - Google Search Console verified
+- Marketplace SDK enabled and app configured
+- Corrected logo exports created (Canva versions in marketing-material/)
+
+### In Progress - Store Listing
+Currently at: **GCP Console → Google Workspace Marketplace SDK → Store Listing**
+
+Need to upload:
+- Icons: Use `-canva.png` files from `marketing-material/Paletteer - Logo - Google WS Marketplace Exports/`
+  - 32x32, 48x48, 96x96, 128x128
+  - 220x140 card banner (Paletteer-Logo-with-text-220x140-canva.png)
+
+Need to fill in:
+- App name: Paletteer
+- Short/detailed description
+- Category: Productivity
+- Support URL: https://github.com/evanholmes/gs-addon-paletteer/issues
+
+Still needed:
+- Screenshot(s) of add-on in action (1280×800 recommended)
+- Submit for Marketplace publication review
+
+### Brand Colors
+1. Ocean Mist: #63B8A5
+2. Vibrant Coral: #EC7B64
+3. Tuscan Sun: #F4CC5C
+4. Deep Lilac: #8A54B2
+5. Twilight Indigo: #2C2A69
+- Text "Paletteer": #363845
